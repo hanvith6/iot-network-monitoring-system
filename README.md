@@ -122,9 +122,10 @@ All dashboard iterations are exported as importable JSON files in [`thingsboard/
 
 ### Research
 
-| Document | Description |
-|---|---|
-| [research/IEEE_paper.docx](research/IEEE_paper.docx) | **Supporting IEEE research paper** — academic background and technical analysis underpinning this project |
+> **IEEE paper currently under peer review — not yet published.**  
+> The supporting research paper is available upon request. Contact via GitHub profile.  
+
+
 
 ---
 

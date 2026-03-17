@@ -51,6 +51,9 @@ pnpm-debug.log*
 *.swo
 *~
 
+# --- Research (unpublished paper — kept local only) ---
+research/
+
 # --- Temporary files ---
 *.tmp
 *.temp
