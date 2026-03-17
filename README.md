@@ -220,4 +220,4 @@ The ESP32 publishes JSON telemetry every 5 seconds:
 
 ## License
 
-This project is submitted as a Final Year Project. All rights reserved by the author.
+This project is licensed under the [MIT License](LICENSE) — © 2026 Hanvith.
