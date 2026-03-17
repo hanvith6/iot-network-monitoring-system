@@ -1,0 +1,333 @@
+{
+    "title": "Smart Drainage Monitor (Final)",
+    "image": null,
+    "mobileHide": false,
+    "mobileOrder": null,
+    "configuration": {
+        "description": "Final Year Project Dashboard - Exact Spec",
+        "widgets": {
+            "widget_1_flow": {
+                "isSystemType": true,
+                "bundleAlias": "charts",
+                "typeAlias": "basic_timeseries",
+                "type": "timeseries",
+                "title": "Flow Rate (L/min)",
+                "sizeX": 12,
+                "sizeY": 8,
+                "row": 0,
+                "col": 0,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "flow_lpm",
+                                    "type": "timeseries",
+                                    "label": "Flow Rate",
+                                    "color": "#4caf50",
+                                    "units": "L/min"
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 300000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "showLegend": true,
+                        "legendConfig": {
+                            "position": "bottom"
+                        },
+                        "yaxis": {
+                            "min": 0,
+                            "title": "L/min"
+                        }
+                    }
+                }
+            },
+            "widget_2_level": {
+                "isSystemType": true,
+                "bundleAlias": "charts",
+                "typeAlias": "basic_timeseries",
+                "type": "timeseries",
+                "title": "Water Level (cm)",
+                "sizeX": 12,
+                "sizeY": 8,
+                "row": 0,
+                "col": 12,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "water_level_cm",
+                                    "type": "timeseries",
+                                    "label": "Water Level",
+                                    "color": "#2196f3",
+                                    "units": "cm"
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 300000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "showLegend": true,
+                        "legendConfig": {
+                            "position": "bottom"
+                        },
+                        "yaxis": {
+                            "max": 50,
+                            "title": "cm"
+                        }
+                    }
+                }
+            },
+            "widget_3_rise": {
+                "isSystemType": true,
+                "bundleAlias": "charts",
+                "typeAlias": "basic_timeseries",
+                "type": "timeseries",
+                "title": "Water Rise Rate (cm/min)",
+                "sizeX": 24,
+                "sizeY": 6,
+                "row": 8,
+                "col": 0,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "rise_rate_cm_per_min",
+                                    "type": "timeseries",
+                                    "label": "Rise Rate",
+                                    "color": "#FF9800",
+                                    "units": "cm/min"
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 300000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "showLegend": true,
+                        "legendConfig": {
+                            "position": "bottom"
+                        }
+                    }
+                }
+            },
+            "widget_4_eta": {
+                "isSystemType": true,
+                "bundleAlias": "cards",
+                "typeAlias": "simple_card",
+                "type": "latest",
+                "title": "Estimated Time to Overflow (min)",
+                "sizeX": 8,
+                "sizeY": 4,
+                "row": 14,
+                "col": 0,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "overflow_eta_min",
+                                    "type": "timeseries",
+                                    "label": "ETA",
+                                    "color": "#FFC107",
+                                    "decimals": 1
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 60000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "label": "Minutes Remaining",
+                        "units": "min",
+                        "showLabel": true
+                    }
+                }
+            },
+            "widget_5_state": {
+                "isSystemType": true,
+                "bundleAlias": "cards",
+                "typeAlias": "html_card",
+                "type": "latest",
+                "title": "Drainage State",
+                "sizeX": 8,
+                "sizeY": 4,
+                "row": 14,
+                "col": 8,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "state",
+                                    "type": "timeseries",
+                                    "label": "State",
+                                    "color": "#000"
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 60000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "cardHtml": "<div style='text-align:center; height:100%; display:flex; flex-direction:column; justify-content:center;'>\n<div style='font-size:24px; font-weight:bold;'>${state}</div>\n</div>"
+                    }
+                }
+            },
+            "widget_6_alert": {
+                "isSystemType": true,
+                "bundleAlias": "cards",
+                "typeAlias": "html_card",
+                "type": "latest",
+                "title": "Alert Level",
+                "sizeX": 8,
+                "sizeY": 4,
+                "row": 14,
+                "col": 16,
+                "config": {
+                    "datasources": [
+                        {
+                            "type": "entity",
+                            "name": "Drainage Node",
+                            "entityAliasId": "alias_drainage_node",
+                            "dataKeys": [
+                                {
+                                    "name": "alert_level",
+                                    "type": "timeseries",
+                                    "label": "Alert",
+                                    "color": "#d32f2f"
+                                }
+                            ]
+                        }
+                    ],
+                    "timewindow": {
+                        "realtime": {
+                            "interval": 1000,
+                            "timewindowMs": 60000
+                        }
+                    },
+                    "showTitle": true,
+                    "backgroundColor": "#fff",
+                    "settings": {
+                        "cardHtml": "<div style='text-align:center; height:100%; display:flex; flex-direction:column; justify-content:center;'>\n<div style='font-size:24px; font-weight:bold; color:${alert_level:color};'>${alert_level}</div>\n</div>"
+                    }
+                }
+            }
+        },
+        "states": {
+            "default": {
+                "name": "Smart Drainage",
+                "root": true,
+                "layouts": {
+                    "main": {
+                        "widgets": {
+                            "widget_1_flow": {
+                                "sizeX": 12,
+                                "sizeY": 8,
+                                "row": 0,
+                                "col": 0
+                            },
+                            "widget_2_level": {
+                                "sizeX": 12,
+                                "sizeY": 8,
+                                "row": 0,
+                                "col": 12
+                            },
+                            "widget_3_rise": {
+                                "sizeX": 24,
+                                "sizeY": 6,
+                                "row": 8,
+                                "col": 0
+                            },
+                            "widget_4_eta": {
+                                "sizeX": 8,
+                                "sizeY": 4,
+                                "row": 14,
+                                "col": 0
+                            },
+                            "widget_5_state": {
+                                "sizeX": 8,
+                                "sizeY": 4,
+                                "row": 14,
+                                "col": 8
+                            },
+                            "widget_6_alert": {
+                                "sizeX": 8,
+                                "sizeY": 4,
+                                "row": 14,
+                                "col": 16
+                            }
+                        },
+                        "gridSettings": {
+                            "backgroundColor": "#eeeeee",
+                            "columns": 24,
+                            "margin": 10
+                        }
+                    }
+                }
+            }
+        },
+        "entityAliases": {
+            "alias_drainage_node": {
+                "id": "alias_drainage_node",
+                "alias": "Drainage Sensor Node",
+                "filter": {
+                    "type": "deviceType",
+                    "resolveMultiple": false,
+                    "deviceType": "default",
+                    "deviceNameFilter": ""
+                }
+            }
+        }
+    }
+}
