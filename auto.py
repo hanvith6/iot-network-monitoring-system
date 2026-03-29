@@ -192,7 +192,7 @@ def load_dashboard_template_payload(device_name):
 def build_dashboard_payload(device_name):
     alias_id = "alias_drainage_node"
 
-    def latest_card(widget_id, title, key, units, color, row, col, sx=6, sy=4):
+    def latest_card(widget_id, title, key, units, color, row, col, sx=8, sy=4):
         return widget_id, {
             "isSystemType": True,
             "bundleAlias": "cards",
@@ -223,71 +223,20 @@ def build_dashboard_payload(device_name):
             }
         }, {"sizeX": sx, "sizeY": sy, "row": row, "col": col}
 
-    def html_status_card(widget_id, title, key, row, col, sx=8, sy=4):
-        return widget_id, {
-            "isSystemType": True,
-            "bundleAlias": "cards",
-            "typeAlias": "html_card",
-            "type": "latest",
-            "title": title,
-            "sizeX": sx,
-            "sizeY": sy,
-            "row": row,
-            "col": col,
-            "config": {
-                "datasources": [{
-                    "type": "entity",
-                    "name": "Drainage Node",
-                    "entityAliasId": alias_id,
-                    "dataKeys": [{"name": key, "type": "timeseries", "label": title, "color": "#000000"}]
-                }],
-                "timewindow": {"realtime": {"interval": 5000, "timewindowMs": 60000}},
-                "showTitle": True,
-                "backgroundColor": "#ffffff",
-                "settings": {
-                    "cardHtml": "<div style='text-align:center;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700'>${" + key + "}</div>"
-                }
-            }
-        }, {"sizeX": sx, "sizeY": sy, "row": row, "col": col}
-
-    def chart(widget_id, title, key, color, row, col, sx=12, sy=6):
-        return widget_id, {
-            "isSystemType": True,
-            "bundleAlias": "charts",
-            "typeAlias": "basic_timeseries",
-            "type": "timeseries",
-            "title": title,
-            "sizeX": sx,
-            "sizeY": sy,
-            "row": row,
-            "col": col,
-            "config": {
-                "datasources": [{
-                    "type": "entity",
-                    "name": "Drainage Node",
-                    "entityAliasId": alias_id,
-                    "dataKeys": [{"name": key, "type": "timeseries", "label": title, "color": color}]
-                }],
-                "timewindow": {"realtime": {"interval": 5000, "timewindowMs": 1800000}},
-                "showTitle": True,
-                "backgroundColor": "#ffffff",
-                "settings": {"showLegend": True, "legendConfig": {"position": "bottom"}}
-            }
-        }, {"sizeX": sx, "sizeY": sy, "row": row, "col": col}
-
     widgets = {}
     layout = {}
 
+    # Compatibility-safe layout: only simple cards to avoid version-specific widget runtime JS errors.
     for widget_id, w, l in [
-        latest_card("w_level", "Water Level", "water_level_cm", "cm", "#2196F3", 0, 0, 6, 4),
-        latest_card("w_flow", "Flow Rate", "flow_lpm", "L/min", "#4CAF50", 0, 6, 6, 4),
-        latest_card("w_rise", "Rise Rate", "rise_rate_cm_per_min", "cm/min", "#FF9800", 0, 12, 6, 4),
-        latest_card("w_eta", "Overflow ETA", "overflow_eta_min", "min", "#F44336", 0, 18, 6, 4),
-        html_status_card("w_state", "System State", "state", 4, 0, 8, 4),
-        html_status_card("w_alert", "Alert Level", "alert_level", 4, 8, 8, 4),
-        latest_card("w_fill", "Tank Fill %", "fill_percent", "%", "#00BCD4", 4, 16, 8, 4),
-        chart("w_level_hist", "Water Level History", "water_level_cm", "#2196F3", 8, 0, 12, 6),
-        chart("w_flow_hist", "Flow Rate History", "flow_lpm", "#4CAF50", 8, 12, 12, 6),
+        latest_card("w_level", "Water Level", "water_level_cm", "cm", "#2196F3", 0, 0, 8, 4),
+        latest_card("w_flow", "Flow Rate", "flow_lpm", "L/min", "#4CAF50", 0, 8, 8, 4),
+        latest_card("w_rise", "Rise Rate", "rise_rate_cm_per_min", "cm/min", "#FF9800", 0, 16, 8, 4),
+        latest_card("w_eta", "Overflow ETA", "overflow_eta_min", "min", "#F44336", 4, 0, 8, 4),
+        latest_card("w_state", "System State", "state", "", "#607D8B", 4, 8, 8, 4),
+        latest_card("w_alert", "Alert Level", "alert_level", "", "#9C27B0", 4, 16, 8, 4),
+        latest_card("w_fill", "Tank Fill %", "fill_percent", "%", "#00BCD4", 8, 0, 8, 4),
+        latest_card("w_battery", "Battery", "battery_level", "%", "#8BC34A", 8, 8, 8, 4),
+        latest_card("w_device", "Device", "state", "", "#795548", 8, 16, 8, 4),
     ]:
         widgets[widget_id] = w
         layout[widget_id] = l
@@ -394,7 +343,7 @@ else:
 # STEP 4 — BUILD DASHBOARD
 # ═══════════════════════════════════════════════════════════════════
 step("STEP 4 — Building dashboard (9 widgets)")
-dashboard_payload = load_dashboard_template_payload(DEVICE_NAME)
+dashboard_payload = build_dashboard_payload(DEVICE_NAME)
 
 r = s.post(f"{HOST}/api/dashboard", data=json.dumps(dashboard_payload))
 if r.status_code not in (200, 201):
