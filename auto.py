@@ -22,7 +22,7 @@ Usage:
     python3 drainage_full_setup.py
 """
 
-import json, os, sys
+import json, os, sys, time
 
 try:
     import requests
@@ -44,6 +44,7 @@ TEMPLATE_PATH = os.getenv(
     "TB_DASHBOARD_TEMPLATE",
     "thingsboard/dashboards/thingsboard_dashboard_final.json",
 )
+RUN_SUFFIX = os.getenv("TB_RUN_SUFFIX", str(int(time.time()))[-6:])
 
 # Alarm thresholds — match your ESP32 code
 OVERFLOW_THRESHOLD  = 40.0   # cm — CRITICAL
@@ -126,6 +127,10 @@ def dashboard_looks_tiny(configuration):
             return True
 
         if widgets and len(layout_widgets) < max(3, len(widgets) // 2):
+            return True
+
+        # Recruiter-facing final dashboard should be the full 9-widget composition.
+        if len(layout_widgets) < 9:
             return True
     except Exception:
         return True
@@ -613,7 +618,7 @@ step("STEP 6 — Setting up email notifications")
 
 # Create notification template
 template_payload = {
-    "name": "Drainage Alert Template",
+    "name": f"Drainage Alert Template {RUN_SUFFIX}",
     "notificationType": "ALARM",
     "configuration": {
         "notificationType": "ALARM",
@@ -670,12 +675,12 @@ else:
 
 # Create notification target (who gets the email)
 target_payload = {
-    "name": "Drainage Alert Recipients",
+    "name": f"Drainage Alert Recipients {RUN_SUFFIX}",
     "configuration": {
         "type": "PLATFORM_USERS",
         "usersFilter": {
             "type": "USER_LIST",
-            "userIds": [user["id"]["id"]]
+            "usersIds": [user["id"]["id"]]
         }
     }
 }
@@ -690,7 +695,7 @@ else:
 # Create notification rule
 if template_id and target_id:
     rule_payload = {
-        "name": "Drainage Alarm Notifications",
+        "name": f"Drainage Alarm Notifications {RUN_SUFFIX}",
         "enabled": True,
         "templateId": {"id": template_id, "entityType": "NOTIFICATION_TEMPLATE"},
         "triggerType": "ALARM",
@@ -703,8 +708,9 @@ if template_id and target_id:
         },
         "recipientsConfig": {
             "triggerType": "ALARM",
-            "targets": [target_id],
-            "escalationTable": {}
+            "escalationTable": {
+                "0": [target_id]
+            }
         },
         "additionalConfig": {"description": "Sends email alerts for all drainage alarms"}
     }
