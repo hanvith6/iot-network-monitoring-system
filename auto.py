@@ -42,7 +42,7 @@ DEVICE_NAME = "DrainageNode01"
 ALERT_EMAIL = os.getenv("ALERT_EMAIL", "alerts@example.com")
 TEMPLATE_PATH = os.getenv(
     "TB_DASHBOARD_TEMPLATE",
-    "thingsboard/dashboards/thingsboard_dashboard_final.json",
+    "thingsboard/dashboards/thingsboard_dashboard_v4.json",
 )
 RUN_SUFFIX = os.getenv("TB_RUN_SUFFIX", str(int(time.time()))[-6:])
 
@@ -160,6 +160,22 @@ def load_dashboard_template_payload(device_name, device_id=None):
     payload["title"] = "Smart Drainage Monitor"
     cfg = payload.setdefault("configuration", {})
     cfg.setdefault("widgets", {})
+
+    # Normalize widget config for this ThingsBoard cloud build.
+    for _wid, widget in cfg["widgets"].items():
+        wcfg = widget.setdefault("config", {})
+        datasources = wcfg.setdefault("datasources", [])
+        for ds in datasources:
+            for key in ds.get("dataKeys", []):
+                key.setdefault("settings", {})
+
+        if widget.get("bundleAlias") == "cards" and widget.get("typeAlias") == "simple_card":
+            s_cfg = wcfg.setdefault("settings", {})
+            s_cfg.setdefault("cardHtml", "<div style='display:flex;align-items:center;justify-content:center;height:100%;font-size:32px;font-weight:600;color:#555'>${value}</div>")
+            s_cfg.setdefault("cardCss", "")
+
+        if widget.get("bundleAlias") == "charts" and widget.get("typeAlias") == "basic_timeseries":
+            wcfg.setdefault("timewindow", {}).setdefault("aggregation", {"type": "NONE", "limit": 200})
 
     aliases = cfg.setdefault("entityAliases", {})
     if aliases:
@@ -366,8 +382,8 @@ else:
 # ═══════════════════════════════════════════════════════════════════
 # STEP 4 — BUILD DASHBOARD
 # ═══════════════════════════════════════════════════════════════════
-step("STEP 4 — Building dashboard (9 widgets)")
-dashboard_payload = build_dashboard_payload(DEVICE_NAME, device_id)
+step("STEP 4 — Building dashboard")
+dashboard_payload = load_dashboard_template_payload(DEVICE_NAME, None)
 
 r = s.post(f"{HOST}/api/dashboard", data=json.dumps(dashboard_payload))
 if r.status_code not in (200, 201):
@@ -402,7 +418,7 @@ if r.status_code == 200:
     if dashboard_looks_tiny(created_cfg):
         info("Dashboard looked tiny after creation. Applying stable full-size layout fix...")
         created_dash["title"] = "Smart Drainage Monitor"
-        created_dash["configuration"] = build_dashboard_payload(DEVICE_NAME, device_id)["configuration"]
+        created_dash["configuration"] = load_dashboard_template_payload(DEVICE_NAME, None)["configuration"]
         fix = s.post(f"{HOST}/api/dashboard", data=json.dumps(created_dash))
         if fix.status_code in (200, 201):
             ok("Applied auto-fix for tiny dashboard layout")
@@ -706,9 +722,7 @@ print(f"""
 ║  → {HOST}/dashboards/{dash_id[:8]}...
 ║                                                                  ║
 ║  WIDGETS CREATED ({dashboard_widget_count} total)                                      ║
-║  Row 1: Water Level | Flow Rate | Rise Rate | Overflow ETA      ║
-║  Row 2: System State | Alert Level | Tank Fill %                ║
-║  Row 3: Water Level Chart | Flow Rate Chart                     ║
+║  Layout: Template-driven ThingsBoard v4 widget placement         ║
 ║                                                                  ║
 ║  ALARM RULES (3 total)                                          ║
 ║  • Overflow Risk    → water_level_cm > {OVERFLOW_THRESHOLD} cm (CRITICAL)        ║
