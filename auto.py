@@ -90,7 +90,21 @@ def authenticate():
     ok("Authenticated via ThingsBoard REST login")
 
 
-def build_alias_for_device(alias_id, alias_name, device_name):
+def build_alias_for_device(alias_id, alias_name, device_name, device_id=None):
+    if device_id:
+        return {
+            "id": alias_id,
+            "alias": alias_name,
+            "filter": {
+                "type": "singleEntity",
+                "singleEntity": {
+                    "entityType": "DEVICE",
+                    "id": device_id,
+                },
+                "resolveMultiple": False,
+            },
+        }
+
     return {
         "id": alias_id,
         "alias": alias_name,
@@ -135,7 +149,7 @@ def dashboard_looks_tiny(configuration):
     return False
 
 
-def load_dashboard_template_payload(device_name):
+def load_dashboard_template_payload(device_name, device_id=None):
     try:
         with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
             payload = json.load(f)
@@ -156,10 +170,11 @@ def load_dashboard_template_payload(device_name):
             first_alias.get("id", first_alias_key),
             first_alias.get("alias", "Drainage Sensor Node"),
             device_name,
+            device_id,
         )
     else:
         aliases["alias_drainage_node"] = build_alias_for_device(
-            "alias_drainage_node", "Drainage Sensor Node", device_name
+            "alias_drainage_node", "Drainage Sensor Node", device_name, device_id
         )
 
     states = cfg.setdefault("states", {})
@@ -189,7 +204,7 @@ def load_dashboard_template_payload(device_name):
     return payload
 
 
-def build_dashboard_payload(device_name):
+def build_dashboard_payload(device_name, device_id=None):
     alias_id = "alias_drainage_node"
 
     def latest_card(widget_id, title, key, units, color, row, col, sx=8, sy=4):
@@ -248,14 +263,12 @@ def build_dashboard_payload(device_name):
             "widgets": widgets,
             "entityAliases": {
                 alias_id: {
-                    "id": alias_id,
-                    "alias": "Drainage Sensor Node",
-                    "filter": {
-                        "type": "entityName",
-                        "resolveMultiple": False,
-                        "entityType": "DEVICE",
-                        "entityNameFilter": device_name,
-                    },
+                    **build_alias_for_device(
+                        alias_id,
+                        "Drainage Sensor Node",
+                        device_name,
+                        device_id,
+                    )
                 }
             },
             "states": {
@@ -343,7 +356,7 @@ else:
 # STEP 4 — BUILD DASHBOARD
 # ═══════════════════════════════════════════════════════════════════
 step("STEP 4 — Building dashboard (9 widgets)")
-dashboard_payload = build_dashboard_payload(DEVICE_NAME)
+dashboard_payload = build_dashboard_payload(DEVICE_NAME, device_id)
 
 r = s.post(f"{HOST}/api/dashboard", data=json.dumps(dashboard_payload))
 if r.status_code not in (200, 201):
@@ -378,7 +391,7 @@ if r.status_code == 200:
     if dashboard_looks_tiny(created_cfg):
         info("Dashboard looked tiny after creation. Applying stable full-size layout fix...")
         created_dash["title"] = "Smart Drainage Monitor"
-        created_dash["configuration"] = build_dashboard_payload(DEVICE_NAME)["configuration"]
+        created_dash["configuration"] = build_dashboard_payload(DEVICE_NAME, device_id)["configuration"]
         fix = s.post(f"{HOST}/api/dashboard", data=json.dumps(created_dash))
         if fix.status_code in (200, 201):
             ok("Applied auto-fix for tiny dashboard layout")
