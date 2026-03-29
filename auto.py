@@ -229,12 +229,23 @@ def build_dashboard_payload(device_name, device_id=None):
                         "label": title,
                         "color": color,
                         "units": units,
-                        "decimals": 1
+                        "decimals": 1,
+                        "settings": {}
                     }]
                 }],
-                "timewindow": {"realtime": {"interval": 5000, "timewindowMs": 300000}},
+                "timewindow": {
+                    "realtime": {"interval": 5000, "timewindowMs": 300000},
+                    "aggregation": {"type": "NONE", "limit": 200},
+                },
                 "showTitle": True,
-                "backgroundColor": "#ffffff"
+                "backgroundColor": "#ffffff",
+                "padding": "8px",
+                "settings": {
+                    "cardHtml": "<div style='display:flex;align-items:center;justify-content:center;height:100%;font-size:30px;font-weight:700;color:#444'>${"
+                    + key
+                    + "}</div>",
+                    "cardCss": "",
+                },
             }
         }, {"sizeX": sx, "sizeY": sy, "row": row, "col": col}
 
