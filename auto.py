@@ -129,9 +129,6 @@ def dashboard_looks_tiny(configuration):
         if widgets and len(layout_widgets) < max(3, len(widgets) // 2):
             return True
 
-        # Recruiter-facing final dashboard should be the full 9-widget composition.
-        if len(layout_widgets) < 9:
-            return True
     except Exception:
         return True
 
@@ -407,6 +404,7 @@ ok(f"Dashboard created: {dash_id}")
 info(f"URL: {HOST}/dashboards/{dash_id}")
 
 # Verify final persisted dashboard layout and auto-repair if it is tiny.
+dashboard_widget_count = "unknown"
 r = s.get(f"{HOST}/api/dashboard/{dash_id}")
 if r.status_code == 200:
     created_dash = r.json()
@@ -426,6 +424,7 @@ if r.status_code == 200:
         .get("gridSettings", {})
         .get("columns", "?")
     )
+    dashboard_widget_count = len(layout_widgets)
     info(f"Dashboard validation: widgets={len(layout_widgets)}, gridColumns={grid_columns}")
     if dashboard_looks_tiny(created_cfg):
         info("Dashboard looked tiny after creation. Applying stable full-size layout fix...")
@@ -733,7 +732,7 @@ print(f"""
 ║  DASHBOARD                                                       ║
 ║  → {HOST}/dashboards/{dash_id[:8]}...
 ║                                                                  ║
-║  WIDGETS CREATED (9 total)                                       ║
+║  WIDGETS CREATED ({dashboard_widget_count} total)                                      ║
 ║  Row 1: Water Level | Flow Rate | Rise Rate | Overflow ETA      ║
 ║  Row 2: System State | Alert Level | Tank Fill %                ║
 ║  Row 3: Water Level Chart | Flow Rate Chart                     ║
