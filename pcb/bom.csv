@@ -1,0 +1,17 @@
+Ref,Qty,Value,Description,Footprint,LCSC/JLCPCB Part,Notes
+U1,1,ESP32-DevKit,ESP32-WROOM-32D-N4 Dev Board (2×19 headers),—,—,Plug-in via female headers — not soldered directly
+J1,1,KF301-4P,4-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-4pin,C428725,HC-SR04 connector (VCC/TRIG/ECHO/GND)
+J2,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,YF-S201 connector
+J3,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,SEN0189 turbidity connector
+J4,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,TDS Meter V1.0 connector
+J5,1,PinHeader-4P,4-pin 2.54mm female header,Connector_PinHeader_2.54mm:PinHeader_1x04,C429926,LCD I2C connector (GND/VCC/SDA/SCL)
+J6,1,DC-005,5.5mm barrel jack (5V input),Connector_BarrelJack:BarrelJack_Horizontal,C136744,USB power bank or 5V adapter
+H1-H4,4,M3 mounting hole,3.2mm drill non-plated,MountingHole:MountingHole_3.2mm_M3,—,Board corner mounting
+R1,1,4.7k 0805,I2C pull-up SCL → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,SCL pull-up
+R2,1,4.7k 0805,I2C pull-up SDA → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,SDA pull-up
+C1,1,100nF 0805,Decoupling cap — TURB_AO,Capacitor_SMD:C_0805_2012Metric,C49678,Analog noise filter
+C2,1,100nF 0805,Decoupling cap — TDS_AO,Capacitor_SMD:C_0805_2012Metric,C49678,Analog noise filter
+C3,1,100nF 0805,Decoupling cap — 5V bulk,Capacitor_SMD:C_0805_2012Metric,C49678,Power rail
+C4,1,10uF 0805,Bulk decoupling — 5V rail,Capacitor_SMD:C_0805_2012Metric,C440727,Bulk power cap
+HDR_L,1,Conn_02x19 female,Left ESP32 header (19-pin),Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical,C429926,Accepts ESP32 DevKit left rail
+HDR_R,1,Conn_02x19 female,Right ESP32 header (19-pin),Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical,C429926,Accepts ESP32 DevKit right rail
