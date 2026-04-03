@@ -8,7 +8,7 @@ export function Header() {
                     <div className="bg-blue-600 p-1.5 rounded-lg">
                         <Activity className="h-5 w-5 text-white" />
                     </div>
-                    <span>Drainage<span className="text-blue-500">Monitor</span></span>
+                    <span>RTDMS<span className="text-blue-500"> Monitor</span></span>
                 </div>
                 <nav className="ml-auto flex gap-4">
                     <div className="flex items-center gap-2 text-sm text-slate-400">

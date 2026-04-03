@@ -3,74 +3,154 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, Loader2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Waves, ArrowRight, Loader2, Lock, Mail, Shield, Activity } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LoginPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Mimic API delay
-        setTimeout(() => {
-            router.push("/");
-        }, 1000);
+        setTimeout(() => router.push("/"), 1200);
     };
 
     return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]pointer-events-none" />
+        <div className="min-h-screen bg-[#060e17] flex items-center justify-center p-4 relative overflow-hidden">
 
-            <Card className="w-full max-w-md border-slate-800 bg-slate-900/80 backdrop-blur-xl relative z-10">
-                <CardHeader className="text-center pb-2">
-                    <div className="flex justify-center mb-4">
-                        <div className="bg-blue-600 p-3 rounded-xl shadow-lg shadow-blue-900/30">
-                            <Activity className="h-8 w-8 text-white" />
-                        </div>
+            {/* Background: grid + glow orbs */}
+            <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                <div
+                    className="absolute inset-0 opacity-100"
+                    style={{
+                        backgroundImage:
+                            "linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px), " +
+                            "linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px)",
+                        backgroundSize: "44px 44px",
+                    }}
+                />
+                <div
+                    className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full"
+                    style={{ background: "radial-gradient(circle, rgba(0,200,255,0.07) 0%, transparent 65%)" }}
+                />
+                <div
+                    className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full"
+                    style={{ background: "radial-gradient(circle, rgba(0,80,200,0.05) 0%, transparent 65%)" }}
+                />
+            </div>
+
+            <div className="w-full max-w-[360px] relative z-10 space-y-6">
+
+                {/* Branding */}
+                <div className="text-center space-y-3">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20">
+                        <Waves className="w-7 h-7 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-white">Welcome Back</CardTitle>
-                    <p className="text-slate-400 text-sm mt-2">Login to access the Drainage Monitoring System</p>
-                </CardHeader>
-                <CardContent>
+                    <div>
+                        <h1 className="text-white text-xl font-bold tracking-tight">RTDMS</h1>
+                        <p className="text-white/35 text-xs mt-0.5">Real-Time Drainage Monitoring System</p>
+                    </div>
+                </div>
+
+                {/* Card */}
+                <div className="bg-[#0d1f2d] border border-white/[0.08] rounded-2xl p-6 shadow-2xl shadow-black/50">
+                    <div className="mb-5">
+                        <h2 className="text-white font-semibold text-base">Sign in</h2>
+                        <p className="text-white/35 text-xs mt-0.5">Access the monitoring dashboard</p>
+                    </div>
+
                     <form onSubmit={handleLogin} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Email Address</label>
-                            <input
-                                type="email"
-                                placeholder="admin@gitam.edu"
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all"
-                                required
-                            />
+                        {/* Email */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+                                Email
+                            </label>
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20" />
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                    placeholder="admin@gitam.edu"
+                                    className={cn(
+                                        "w-full bg-black/30 border border-white/[0.08] rounded-lg",
+                                        "pl-9 pr-4 py-2.5 text-white text-sm",
+                                        "placeholder:text-white/15",
+                                        "focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/15",
+                                        "transition-all"
+                                    )}
+                                    required
+                                />
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-slate-300">Password</label>
-                            <input
-                                type="password"
-                                placeholder="••••••••"
-                                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-600/50 transition-all"
-                                required
-                            />
+
+                        {/* Password */}
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/20" />
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    className={cn(
+                                        "w-full bg-black/30 border border-white/[0.08] rounded-lg",
+                                        "pl-9 pr-4 py-2.5 text-white text-sm",
+                                        "placeholder:text-white/15",
+                                        "focus:outline-none focus:border-primary/40 focus:ring-1 focus:ring-primary/15",
+                                        "transition-all"
+                                    )}
+                                    required
+                                />
+                            </div>
                         </div>
 
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-primary hover:bg-primary/85 text-white font-semibold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 group mt-1 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/25"
                         >
-                            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Sign In"}
-                            {!loading && <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />}
+                            {loading ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Signing in…
+                                </>
+                            ) : (
+                                <>
+                                    Sign In
+                                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                                </>
+                            )}
                         </button>
-
-                        <div className="text-center pt-2">
-                            <Link href="/register" className="text-sm text-slate-500 hover:text-blue-400 transition-colors">
-                                Don't have an account? <span className="underline underline-offset-4">Register</span>
-                            </Link>
-                        </div>
                     </form>
-                </CardContent>
-            </Card>
+
+                    <div className="mt-4 pt-4 border-t border-white/[0.05] text-center">
+                        <Link href="/register" className="text-[11px] text-white/25 hover:text-primary/70 transition-colors">
+                            Don&apos;t have an account?{" "}
+                            <span className="underline underline-offset-2">Register</span>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Status strip */}
+                <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                        <Activity className="w-3 h-3 text-emerald-400" />
+                        <span className="text-[10px] text-white/25">System Online</span>
+                    </div>
+                    <span className="text-white/10 text-xs">·</span>
+                    <div className="flex items-center gap-1.5">
+                        <Shield className="w-3 h-3 text-white/20" />
+                        <span className="text-[10px] text-white/25">GITAM University</span>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

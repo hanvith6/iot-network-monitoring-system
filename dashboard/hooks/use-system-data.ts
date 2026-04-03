@@ -3,19 +3,25 @@ import mqtt from 'mqtt';
 import { ESP32Payload, SystemData, AlarmLog } from '@/lib/types';
 
 // CONFIGURATION
-const MQTT_BROKER = 'wss://test.mosquitto.org:8081';
-const TOPIC = 'drainage/data';
+const MQTT_BROKER = 'wss://mqtt.eu.thingsboard.cloud:8883';
+const TOPIC = 'v1/devices/me/telemetry';
+const PIPE_DEPTH_CM = 45;
 
 export function useSystemData() {
     const [isLive, setIsLive] = useState(false);
     const [isConnected, setIsConnected] = useState(false);
 
-    // Initial State
     const [data, setData] = useState<SystemData>({
         flowRate: 0,
         waterLevel: 0,
         riseRate: 0,
         eta: null,
+        fillPercent: 0,
+        flowIndex: 1,
+        turbidityRaw: 2200,
+        turbidityStatus: "CLEAR",
+        tdsPpm: 145,
+        tdsStatus: "CLEAN",
         status: "NORMAL",
         alertLevel: "NORMAL",
         batteryLevel: 100,
@@ -30,37 +36,42 @@ export function useSystemData() {
         let client: mqtt.MqttClient | null = null;
 
         if (isLive) {
-            // Live MQTT Mode
-            const clientId = 'client-' + Math.random().toString(16).substr(2, 8);
+            // ── Live MQTT Mode ──────────────────────────────
+            const clientId = 'rtdms-dash-' + Math.random().toString(16).substr(2, 8);
             client = mqtt.connect(MQTT_BROKER, {
                 clientId,
                 keepalive: 60,
                 protocolId: 'MQTT',
                 protocolVersion: 4,
                 clean: true,
-                reconnectPeriod: 1000,
+                reconnectPeriod: 2000,
                 connectTimeout: 30 * 1000,
             });
 
             client.on('connect', () => {
-                console.log('Connected to MQTT Broker');
+                console.log('[RTDMS] Connected to ThingsBoard MQTT');
                 setIsConnected(true);
                 client?.subscribe(TOPIC, (err) => {
-                    if (err) console.error('Subscription error:', err);
+                    if (err) console.error('[RTDMS] Subscription error:', err);
                 });
             });
 
-            client.on('message', (topic, message) => {
+            client.on('message', (_topic, message) => {
                 try {
                     const payload = JSON.parse(message.toString()) as ESP32Payload;
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString();
+                    const timeStr = new Date().toLocaleTimeString();
 
                     const newData: SystemData = {
                         flowRate: payload.flow_lpm,
                         waterLevel: payload.water_level_cm,
                         riseRate: payload.rise_rate_cm_per_min,
                         eta: payload.overflow_eta_min,
+                        fillPercent: payload.fill_percent ?? (payload.water_level_cm / PIPE_DEPTH_CM) * 100,
+                        flowIndex: payload.flow_index ?? 1,
+                        turbidityRaw: payload.turbidity_raw ?? 0,
+                        turbidityStatus: payload.turbidity_status ?? "CLEAR",
+                        tdsPpm: payload.tds_ppm ?? 0,
+                        tdsStatus: payload.tds_status ?? "CLEAN",
                         status: payload.state,
                         alertLevel: payload.alert_level,
                         batteryLevel: payload.battery_level,
@@ -69,110 +80,117 @@ export function useSystemData() {
 
                     setData(newData);
                     setHistory(prev => {
-                        const newHistory = [...prev, { ...newData, time: timeStr }];
-                        if (newHistory.length > 20) newHistory.shift();
-                        return newHistory;
+                        const next = [...prev, { ...newData, time: timeStr }];
+                        if (next.length > 20) next.shift();
+                        return next;
                     });
 
-                    // Add to Alarms if not Normal
                     if (newData.alertLevel !== "NORMAL") {
                         setAlarms(prev => {
-                            // Avoid duplicate consecutive alarms for cleanliness
-                            if (prev.length > 0 && prev[prev.length - 1].message === newData.status && prev[prev.length - 1].timestamp === timeStr) return prev;
-
-                            const newAlarm: AlarmLog = {
+                            if (prev.length > 0 &&
+                                prev[0].type === newData.status &&
+                                prev[0].timestamp === timeStr) return prev;
+                            const alarm: AlarmLog = {
                                 id: Math.random().toString(36).substr(2, 9),
                                 timestamp: timeStr,
                                 type: newData.status,
                                 severity: newData.alertLevel,
-                                message: `System state changed to ${newData.status}`
+                                message: `State changed to ${newData.status.replace(/_/g, ' ')}`
                             };
-                            return [newAlarm, ...prev].slice(0, 50); // Keep last 50
+                            return [alarm, ...prev].slice(0, 50);
                         });
                     }
-
                 } catch (e) {
-                    console.error("Failed to parse MQTT message", e);
+                    console.error('[RTDMS] Failed to parse MQTT message', e);
                 }
             });
 
             client.on('error', (err) => {
-                console.error('MQTT Error: ', err);
+                console.error('[RTDMS] MQTT Error:', err);
                 setIsConnected(false);
             });
 
-            client.on('offline', () => {
-                setIsConnected(false);
-            });
+            client.on('offline', () => setIsConnected(false));
+            client.on('reconnect', () => setIsConnected(false));
 
         } else {
-            // Simulation Mode 
+            // ── Simulation Mode ─────────────────────────────
             interval = setInterval(() => {
                 setData((prev) => {
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString();
+                    const timeStr = new Date().toLocaleTimeString();
 
-                    // Simulation Logic
-                    let newFlow = Math.max(0, prev.flowRate + (Math.random() * 2 - 1));
-                    let newWaterLevel = Math.max(0, Math.min(60, prev.waterLevel + (Math.random() * 5 - 2.5)));
+                    let newFlow = Math.max(0, prev.flowRate + (Math.random() * 1.6 - 0.8));
+                    let newWaterLevel = Math.max(0, Math.min(PIPE_DEPTH_CM, prev.waterLevel + (Math.random() * 4 - 1.8)));
 
-                    if (Math.random() > 0.95) newWaterLevel += 8; // Random surge
+                    // Occasional surge
+                    if (Math.random() > 0.96) newWaterLevel = Math.min(PIPE_DEPTH_CM, newWaterLevel + 6);
 
-                    // Logic derived from Firmware
+                    const fillPct = (newWaterLevel / PIPE_DEPTH_CM) * 100;
+                    const expectedQ = 2.5 * Math.pow(Math.max(newWaterLevel, 0.1), 1.5);
+                    const simFlowIndex = expectedQ > 0.1 ? newFlow / expectedQ : 1;
+
                     let status: SystemData["status"] = "NORMAL";
                     let alertLevel: SystemData["alertLevel"] = "NORMAL";
 
-                    if (newWaterLevel > 45) {
-                        status = "OVERFLOW_RISK";
-                        alertLevel = "CRITICAL";
-                    } else if (newWaterLevel > 35) {
-                        status = "PARTIAL_BLOCK";
-                        alertLevel = "ALERT";
-                    } else if (newWaterLevel > 20 && newFlow < 2) {
-                        status = "EARLY_SEDIMENTATION";
-                        alertLevel = "WARNING";
+                    if (fillPct >= 89 || newWaterLevel >= 40) {
+                        status = "OVERFLOW_RISK"; alertLevel = "CRITICAL";
+                    } else if (newWaterLevel >= 35 || (simFlowIndex < 0.4 && newWaterLevel > 20)) {
+                        status = "PARTIAL_BLOCK"; alertLevel = "ALERT";
+                    } else if (newWaterLevel >= 20 && newFlow < 2) {
+                        status = "EARLY_SEDIMENTATION"; alertLevel = "WARNING";
                     }
 
-                    // Simulated Calculations
                     const riseRate = parseFloat((newWaterLevel - prev.waterLevel).toFixed(2));
                     let eta: number | null = null;
-                    if (riseRate > 0.5) {
-                        eta = parseFloat(((50 - newWaterLevel) / riseRate).toFixed(1));
+                    if (riseRate > 0.4) {
+                        eta = parseFloat(((PIPE_DEPTH_CM - newWaterLevel) / riseRate).toFixed(1));
                         if (eta < 0) eta = null;
                     }
+
+                    // Turbidity rises with water level
+                    const simTurbRaw = Math.max(600, 2300 - newWaterLevel * 22);
+                    const simTurbStatus: SystemData["turbidityStatus"] =
+                        simTurbRaw > 2000 ? "CLEAR" : simTurbRaw > 800 ? "MODERATE" : "TURBID";
+
+                    // TDS rises with fill level (simulating sediment/contamination)
+                    const simTdsPpm = Math.max(0, 120 + fillPct * 3.2 + Math.random() * 20);
+                    const simTdsStatus: SystemData["tdsStatus"] =
+                        simTdsPpm < 300 ? "CLEAN" : simTdsPpm < 600 ? "MODERATE" : "CONTAMINATED";
 
                     const newData: SystemData = {
                         flowRate: parseFloat(newFlow.toFixed(1)),
                         waterLevel: parseFloat(newWaterLevel.toFixed(1)),
-                        riseRate: riseRate,
-                        eta: eta,
-                        status: status,
-                        alertLevel: alertLevel,
-                        batteryLevel: 85, // Simulated battery
+                        riseRate,
+                        eta,
+                        fillPercent: parseFloat(fillPct.toFixed(1)),
+                        flowIndex: parseFloat(Math.min(2, Math.max(0, simFlowIndex)).toFixed(3)),
+                        turbidityRaw: Math.round(simTurbRaw),
+                        turbidityStatus: simTurbStatus,
+                        tdsPpm: parseFloat(simTdsPpm.toFixed(1)),
+                        tdsStatus: simTdsStatus,
+                        status,
+                        alertLevel,
+                        batteryLevel: 100,
                         timestamp: timeStr,
                     };
 
-                    setHistory((prevHistory) => {
-                        const newHistory = [...prevHistory, { ...newData, time: timeStr }];
-                        if (newHistory.length > 20) newHistory.shift();
-                        return newHistory;
+                    setHistory(prev => {
+                        const next = [...prev, { ...newData, time: timeStr }];
+                        if (next.length > 20) next.shift();
+                        return next;
                     });
 
-                    // Add to Alarms
-                    if (newData.alertLevel !== "NORMAL") {
-                        // Only add random alarms occasionally in sim mode to avoid spam
-                        if (Math.random() > 0.7) {
-                            setAlarms(prev => {
-                                const newAlarm: AlarmLog = {
-                                    id: Math.random().toString(36).substr(2, 9),
-                                    timestamp: timeStr,
-                                    type: newData.status,
-                                    severity: newData.alertLevel,
-                                    message: `Simulated Alert: ${newData.status}`
-                                };
-                                return [newAlarm, ...prev].slice(0, 50);
-                            });
-                        }
+                    if (newData.alertLevel !== "NORMAL" && Math.random() > 0.7) {
+                        setAlarms(prev => {
+                            const alarm: AlarmLog = {
+                                id: Math.random().toString(36).substr(2, 9),
+                                timestamp: timeStr,
+                                type: newData.status,
+                                severity: newData.alertLevel,
+                                message: `Simulated: ${newData.status.replace(/_/g, ' ')}`
+                            };
+                            return [alarm, ...prev].slice(0, 50);
+                        });
                     }
 
                     return newData;
@@ -182,17 +200,10 @@ export function useSystemData() {
 
         return () => {
             if (interval) clearInterval(interval);
-            if (client) client.end();
+            if (client) { client.end(); }
             setIsConnected(false);
         };
     }, [isLive]);
 
-    return {
-        data,
-        history,
-        alarms,
-        isLive,
-        setIsLive,
-        isConnected
-    };
+    return { data, history, alarms, isLive, setIsLive, isConnected };
 }

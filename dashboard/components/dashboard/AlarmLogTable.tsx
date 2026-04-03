@@ -14,8 +14,8 @@ export function AlarmLogTable({ alarms }: AlarmLogTableProps) {
 
     const filteredAlarms = alarms.filter((alarm) => {
         if (filter === "ALL") return true;
-        if (filter === "CRITICAL") return ["CRITICAL", "OVERFLOW_RISK", "ALERT"].includes(alarm.severity);
-        if (filter === "WARNING") return ["WARNING", "EARLY_SEDIMENTATION", "PARTIAL_BLOCK"].includes(alarm.severity);
+        if (filter === "CRITICAL") return ["CRITICAL", "ALERT"].includes(alarm.severity);
+        if (filter === "WARNING") return alarm.severity === "WARNING";
         return true;
     });
 

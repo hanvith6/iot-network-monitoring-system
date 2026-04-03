@@ -1,6 +1,6 @@
 # Setup & Deployment Guide
 
-Complete instructions for deploying the IoT Drainage Monitoring System from scratch.
+Complete instructions for deploying the Real-Time Drainage Monitoring System from scratch.
 
 ---
 

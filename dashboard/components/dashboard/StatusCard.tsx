@@ -48,7 +48,7 @@ export function StatusCard({ title, value, type, colorCode, iconName }: StatusCa
             <div className="flex flex-col gap-1">
                 <h2 className="text-white text-lg font-bold leading-tight">{title}</h2>
                 <p className={cn("text-2xl font-mono tracking-tight", config.color)}>
-                    {value.replace("_", " ")}
+                    {value.replace(/_/g, " ")}
                 </p>
             </div>
         </div>

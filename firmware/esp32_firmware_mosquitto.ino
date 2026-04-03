@@ -135,6 +135,7 @@ void loop() {
     // Advanced Logic (Same as ThingsBoard version)
     float delta_level = water_level - prev_water_level;
     float elapsed_min = elapsed / 60000.0;
+    if (elapsed_min == 0) elapsed_min = 0.001;
     float rise_rate = (delta_level / elapsed_min);
     if (abs(rise_rate) > 100)
       rise_rate = 0;
@@ -150,7 +151,7 @@ void loop() {
       state = "OVERFLOW_RISK";
     else if (water_level >= THRESHOLD_ALERT)
       state = "PARTIAL_BLOCK";
-    else if (water_level >= THRESHOLD_WARNING && flow_rate_lpm < 2.0)
+    else if (water_level >= THRESHOLD_WARNING && flow_rate_lpm < 2.0 && rise_rate > 0)
       state = "EARLY_SEDIMENTATION";
 
     // JSON Payload
@@ -170,8 +171,13 @@ void loop() {
     payload += "\"state\":\"";
     payload += state;
     payload += "\",";
+    String alert_level = "NORMAL";
+    if (state == "OVERFLOW_RISK") alert_level = "CRITICAL";
+    else if (state == "PARTIAL_BLOCK") alert_level = "ALERT";
+    else if (state == "EARLY_SEDIMENTATION") alert_level = "WARNING";
+
     payload += "\"alert_level\":\"";
-    payload += (state == "NORMAL" ? "NORMAL" : "ALERT");
+    payload += alert_level;
     payload += "\",";
     payload += "\"battery_level\":";
     payload += String(battery_level);

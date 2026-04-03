@@ -9,7 +9,7 @@ export function TopNavBar() {
                     <div className="flex items-center gap-4">
                         <Waves className="w-8 h-8 text-primary" />
                         <h2 className="text-white text-lg font-bold leading-tight tracking-[-0.015em]">
-                            Drainage Monitoring System
+                            Real-Time Drainage Monitoring System
                         </h2>
                     </div>
                     <nav className="hidden md:flex flex-1 justify-end gap-8">

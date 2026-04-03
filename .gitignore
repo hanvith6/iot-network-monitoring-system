@@ -54,6 +54,27 @@ pnpm-debug.log*
 # --- Research (unpublished paper — kept local only) ---
 research/
 
+# --- Firmware with real credentials (NEVER commit) ---
+firmware/capstone.ino
+
 # --- Temporary files ---
 *.tmp
 *.temp
+
+# --- Added: Python artifacts ---
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# --- Added: model weights ---
+*.safetensors
+*.bin
+*.pkl
+*.pt
+*.h5
+
+# --- Added: snapshots ---
+_snapshots/
+*.zip
