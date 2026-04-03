@@ -30,8 +30,8 @@ NETS = {
                   "J_HCSR04.1", "J_YFS201.1", "J_TURB.1",
                   "J_TDS.1",    "J_LCD.2"],
     "+3V3":       ["U_LDO.OUT", "U_ESP32.VCC", "C_3V3A.+", "C_3V3B.+",
-                   "R_SCL.2",   "R_SDA.2",
-                   "R_ECHO_TOP.1"],           # top of echo voltage divider
+                   "R_SCL.2",   "R_SDA.2"],
+    "ECHO_GND":  ["R_ECHO2.2", "GND"],
     "GND":       ["J_PWR.2", "U_LDO.GND", "U_ESP32.GND",
                   "PWR_RAIL.all_GND",
                   "J_HCSR04.4","J_YFS201.3","J_TURB.3",
@@ -39,8 +39,8 @@ NETS = {
                   "C_5V.−",    "C_3V3A.−", "C_3V3B.−"],
     # HC-SR04
     "TRIG":      ["U_ESP32.GPIO5",  "J_HCSR04.2"],
-    "ECHO_5V":   ["J_HCSR04.3",     "R_ECHO_TOP.2"],   # raw 5V echo out
-    "ECHO_3V3":  ["R_ECHO_TOP.3",   "U_ESP32.GPIO18"],  # divided ≈3.3V
+    "ECHO_5V":   ["J_HCSR04.3",     "R_ECHO1.1"],
+    "ECHO_3V3":  ["R_ECHO1.2",      "R_ECHO2.1", "U_ESP32.GPIO18"],
     # YF-S201
     "FLOW":      ["U_ESP32.GPIO19", "J_YFS201.2"],
     # SEN0189 turbidity
@@ -183,10 +183,20 @@ def build():
     b += power_rail("J_RAIL", n_vcc=6, n_gnd=6, x=165, y=30)
 
     # ── HC-SR04 (4-pin male header: VCC · TRIG · ECHO · GND) ─────
-    #    NOTE: ECHO is 5V out from sensor — goes through R divider
-    #    before reaching ESP32 GPIO18 (max 3.3V)
+    #    ECHO is 5V output → passes through 1kΩ/2kΩ divider on PCB
+    #    → ≈3.33V at GPIO18. Works without divider on breadboard
+    #    (ESP32 ESD clamps handle it), but divider is correct for a
+    #    permanent PCB — 2 cheap resistors, zero extra wiring needed.
     b += header("J1", "HC-SR04",
-                4, ["+5V","TRIG","ECHO_5V","GND"],     x=145, y=30)
+                4, ["+5V","TRIG","ECHO_5V","GND"],      x=145, y=30)
+
+    # ── ECHO voltage divider (5V → 3.3V) ─────────────────────────
+    #    ECHO_5V → 1kΩ → ECHO_3V3 → 2kΩ → GND
+    #    Mid-point = 5V × 2/(1+2) = 3.33V → GPIO18
+    b += resistor("R_ECHO1", "1k",  x=115, y=32)
+    b += resistor("R_ECHO2", "2k",  x=115, y=42)
+    b += net_label("ECHO_5V",  113, 30)
+    b += net_label("ECHO_3V3", 113, 38)
 
     # ── YF-S201 flow meter (3-pin: VCC · SIG · GND) ──────────────
     b += header("J2", "YF-S201",
@@ -203,14 +213,6 @@ def build():
     # ── LCD 1602 I2C (4-pin: GND · VCC · SDA · SCL) ─────────────
     b += header("J5", "LCD1602-I2C",
                 4, ["GND","+5V","SDA","SCL"],           x=145, y=115)
-
-    # ── ECHO voltage divider (5V → 3.3V)  ────────────────────────
-    #    ECHO_5V → R(1kΩ) → ECHO_MID → R(2kΩ) → GND
-    #    ECHO_MID = 5V × 2/(1+2) = 3.33V  ✓ safe for ESP32
-    b += resistor("R_ECHO1", "1k",   x=115, y=32)   # top resistor
-    b += resistor("R_ECHO2", "2k",   x=115, y=42)   # bottom to GND
-    b += net_label("ECHO_5V",  113, 30)
-    b += net_label("ECHO_3V3", 113, 38)              # mid-point → GPIO18
 
     # ── I2C pull-ups (4.7kΩ → 3.3V) ─────────────────────────────
     b += resistor("R_SCL", "4.7k",  x=60, y=130)
@@ -249,7 +251,7 @@ def generate():
     (comment 1 "ESP32-WROOM-32D direct solder (castellated pads) + AMS1117-3.3 LDO")
     (comment 2 "All sensor headers: 2.54mm male pins — plug Dupont female connectors")
     (comment 3 "Power rail: 6x +5V + 6x GND strip on PCB edge")
-    (comment 4 "ECHO voltage divider 1k/2k: 5V→3.3V for GPIO18 protection")
+    (comment 4 "HC-SR04 ECHO: 1kΩ/2kΩ divider 5V→3.3V. Works without on breadboard but divider is correct for permanent PCB")
   )
 
 {build()}

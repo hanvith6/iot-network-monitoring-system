@@ -8,8 +8,8 @@ J2,1,PinHeader-1x03,YF-S201 connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54
 J3,1,PinHeader-1x03,SEN0189 turbidity connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,C429925,JLCPCB / local,VCC · AO · GND
 J4,1,PinHeader-1x03,TDS Meter V1.0 connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,C429925,JLCPCB / local,VCC · AO · GND
 J5,1,PinHeader-1x04,LCD 1602 I2C connector 4-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,C429926,JLCPCB / local,GND · VCC · SDA · SCL
-R_ECHO1,1,1kΩ 0805,Echo voltage divider top (5V→3.3V for GPIO18),Resistor_SMD:R_0805_2012Metric,C17513,JLCPCB,HC-SR04 ECHO output is 5V — divider protects ESP32
-R_ECHO2,1,2kΩ 0805,Echo voltage divider bottom,Resistor_SMD:R_0805_2012Metric,C17522,JLCPCB,Divider mid-point ≈3.33V → GPIO18
+R_ECHO1,1,1kΩ 0805,ECHO divider top — HC-SR04 5V→3.3V for GPIO18,Resistor_SMD:R_0805_2012Metric,C17513,JLCPCB,Works without on breadboard but correct for permanent PCB
+R_ECHO2,1,2kΩ 0805,ECHO divider bottom — mid-point ≈3.33V → GPIO18,Resistor_SMD:R_0805_2012Metric,C17522,JLCPCB,Protects GPIO18 from continuous 5V on soldered board
 R_SCL,1,4.7kΩ 0805,I2C SCL pull-up → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,JLCPCB,Required for I2C reliability
 R_SDA,1,4.7kΩ 0805,I2C SDA pull-up → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,JLCPCB,Required for I2C reliability
 C1,1,100nF 0805,3.3V rail decoupling,Capacitor_SMD:C_0805_2012Metric,C49678,JLCPCB,Place close to U1 VCC pin
