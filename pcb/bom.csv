@@ -1,17 +1,19 @@
-Ref,Qty,Value,Description,Footprint,LCSC/JLCPCB Part,Notes
-U1,1,ESP32-DevKit,ESP32-WROOM-32D-N4 Dev Board (2×19 headers),—,—,Plug-in via female headers — not soldered directly
-J1,1,KF301-4P,4-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-4pin,C428725,HC-SR04 connector (VCC/TRIG/ECHO/GND)
-J2,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,YF-S201 connector
-J3,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,SEN0189 turbidity connector
-J4,1,KF301-3P,3-pin 5mm pitch screw terminal,TerminalBlock_Phoenix:PhoenixContact_MCV_1-3pin,C428726,TDS Meter V1.0 connector
-J5,1,PinHeader-4P,4-pin 2.54mm female header,Connector_PinHeader_2.54mm:PinHeader_1x04,C429926,LCD I2C connector (GND/VCC/SDA/SCL)
-J6,1,DC-005,5.5mm barrel jack (5V input),Connector_BarrelJack:BarrelJack_Horizontal,C136744,USB power bank or 5V adapter
-H1-H4,4,M3 mounting hole,3.2mm drill non-plated,MountingHole:MountingHole_3.2mm_M3,—,Board corner mounting
-R1,1,4.7k 0805,I2C pull-up SCL → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,SCL pull-up
-R2,1,4.7k 0805,I2C pull-up SDA → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,SDA pull-up
-C1,1,100nF 0805,Decoupling cap — TURB_AO,Capacitor_SMD:C_0805_2012Metric,C49678,Analog noise filter
-C2,1,100nF 0805,Decoupling cap — TDS_AO,Capacitor_SMD:C_0805_2012Metric,C49678,Analog noise filter
-C3,1,100nF 0805,Decoupling cap — 5V bulk,Capacitor_SMD:C_0805_2012Metric,C49678,Power rail
-C4,1,10uF 0805,Bulk decoupling — 5V rail,Capacitor_SMD:C_0805_2012Metric,C440727,Bulk power cap
-HDR_L,1,Conn_02x19 female,Left ESP32 header (19-pin),Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical,C429926,Accepts ESP32 DevKit left rail
-HDR_R,1,Conn_02x19 female,Right ESP32 header (19-pin),Connector_PinHeader_2.54mm:PinHeader_1x19_P2.54mm_Vertical,C429926,Accepts ESP32 DevKit right rail
+Ref,Qty,Value,Description,Footprint,LCSC Part,Buy From,Notes
+U1,1,ESP32-WROOM-32D-N4,ESP32 WiFi/BT Module — DIRECT SOLDER castellated pads,RF_Module:ESP32-WROOM-32,C701341,JLCPCB / Robu.in,Solder directly to PCB pads — NOT on headers
+U2,1,AMS1117-3.3,LDO Regulator 5V→3.3V 1A SOT-223,Package_TO_SOT_SMD:SOT-223-3_TabPin2,C6186,JLCPCB / LCSC,Needed since no dev board regulator
+J_PWR,1,DC-005,5.5mm barrel jack (5V input),Connector_BarrelJack:BarrelJack_Horizontal,C136744,JLCPCB,Power input from USB power bank
+J_RAIL,1,PinHeader-1x12,Power distribution strip 12-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x12_P2.54mm_Vertical,C429928,JLCPCB / local,6×VCC + 6×GND — sensors tap here with Dupont female
+J1,1,PinHeader-1x04,HC-SR04 connector 4-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,C429926,JLCPCB / local,Dupont female from sensor plugs here (VCC·TRIG·ECHO·GND)
+J2,1,PinHeader-1x03,YF-S201 connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,C429925,JLCPCB / local,VCC · SIG · GND
+J3,1,PinHeader-1x03,SEN0189 turbidity connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,C429925,JLCPCB / local,VCC · AO · GND
+J4,1,PinHeader-1x03,TDS Meter V1.0 connector 3-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical,C429925,JLCPCB / local,VCC · AO · GND
+J5,1,PinHeader-1x04,LCD 1602 I2C connector 4-pin 2.54mm MALE,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,C429926,JLCPCB / local,GND · VCC · SDA · SCL
+R_ECHO1,1,1kΩ 0805,Echo voltage divider top (5V→3.3V for GPIO18),Resistor_SMD:R_0805_2012Metric,C17513,JLCPCB,HC-SR04 ECHO output is 5V — divider protects ESP32
+R_ECHO2,1,2kΩ 0805,Echo voltage divider bottom,Resistor_SMD:R_0805_2012Metric,C17522,JLCPCB,Divider mid-point ≈3.33V → GPIO18
+R_SCL,1,4.7kΩ 0805,I2C SCL pull-up → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,JLCPCB,Required for I2C reliability
+R_SDA,1,4.7kΩ 0805,I2C SDA pull-up → 3.3V,Resistor_SMD:R_0805_2012Metric,C17673,JLCPCB,Required for I2C reliability
+C1,1,100nF 0805,3.3V rail decoupling,Capacitor_SMD:C_0805_2012Metric,C49678,JLCPCB,Place close to U1 VCC pin
+C2,1,10µF 0805,3.3V rail bulk cap,Capacitor_SMD:C_0805_2012Metric,C440727,JLCPCB,Place close to AMS1117 output
+C3,1,100nF 0805,5V rail decoupling,Capacitor_SMD:C_0805_2012Metric,C49678,JLCPCB,Place close to power input
+C4,1,100µF SMD,5V rail bulk cap,Capacitor_SMD:C_1210_3225Metric,C15008,JLCPCB,Large bulk cap for sensor current spikes
+H1-H4,4,M3 3.2mm hole,PCB mounting holes,MountingHole:MountingHole_3.2mm_M3,—,—,One at each corner
